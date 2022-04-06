@@ -27,6 +27,28 @@
   :type 'string
   :group 'erc-logger)
 
+(defcustom *erc-logger-log-begin-time*
+  "30 sec"
+  "Time when to run `erc-logger-log-start' at.
+   To specify a relative time as a string, use numbers followed by units. For
+   example:
+   
+   ‘1 min’
+      
+   denotes 1 minute from now.
+      
+   ‘1 min 5 sec’
+      
+   denotes 65 seconds from now.
+      
+   ‘1 min 2 sec 3 hour 4 day 5 week 6 fortnight 7 month 8 year’
+       
+   denotes exactly 103 months, 123 days, and 10862 seconds from now.
+
+   For more information, please read the manual at https://www.gnu.org/software/emacs/manual/html_node/elisp/Timers.html#index-run_002dat_002dtime"
+  :type 'string
+  :group 'erc-logger)
+
 (defcustom *erc-logger-log-interval*
   10
   "The interval (second) to run `erc-log-buffers' repeatedly."
@@ -98,7 +120,12 @@
 			(current-message-point (gethash erc-buffer *erc-logger-irc-buffer-size-map*))
 			(end-of-message-point (erc-logger-end-of-messages)))
 		   (cl-flet ((save-buffer-graceful
-			      nil (if (file-exists-p file-full-path)
+			      nil (unless current-message-point
+				    (let ((new-current-message-point (erc-logger-end-of-messages)))
+				      (puthash erc-buffer new-current-message-point
+					       *erc-logger-irc-buffer-size-map*)
+				      (setq current-message-point new-current-message-point)))
+			      (if (file-exists-p file-full-path)
 				      (when (not (= end-of-message-point current-message-point))
 					(append-to-file current-message-point end-of-message-point file-full-path))
 				    (erc-logger-write-file-immut file-full-path))
