@@ -16,11 +16,29 @@
 (defvar *erc-logger-irc-buffer-size-map*
   (make-hash-table :test 'equal))
 
-(defun write-file-immut (filename)
+;; (defun erc-logger-write-file-immut (filename)
+;;   (let ((cur-buffer (current-buffer)))
+;;     (with-temp-buffer
+;;       (insert-buffer cur-buffer)
+;;       (unless inhibit-read-only
+;; 	(setq-local inhibit-read-only t)
+;; 	(remove-text-properties (point-min) (point-max) 'read-only))
+;;       (goto-char (point-max))
+;;       (previous-line 2)
+;;       (delete-matching-lines "ERC> ")
+;;       (write-file filename))))
+(defun erc-logger-write-file-immut (filename)
   (let ((cur-buffer (current-buffer)))
     (with-temp-buffer
       (insert-buffer cur-buffer)
+      (unless inhibit-read-only
+	(setq-local inhibit-read-only t)
+	(remove-text-properties (point-min) (point-max) 'read-only))
+      (goto-char (point-max))
+      (search-backward "ERC> ")
+      (delete-region (line-beginning-position) (line-end-position))
       (write-file filename))))
+
 
 (defun erc-logger-end-of-messages ()
   (save-excursion
@@ -39,6 +57,8 @@
   (dolist (erc-buffer (erc-buffer-list))
     (with-current-buffer (current-buffer)
       (switch-to-buffer erc-buffer)
+      (setq-local inhibit-read-only t)
+      (remove-text-properties (point-min) (point-max) 'read-only)
       (unless (gethash erc-buffer *erc-logger-irc-buffer-size-map*)
 	(puthash erc-buffer (erc-logger-end-of-messages)
 		 *erc-logger-irc-buffer-size-map*))))
@@ -59,16 +79,21 @@
 		 (let* ((file-name (concat (buffer-name erc-buffer)
 					   (datetime-format "_%Y-%m-%d.txt")))
 			(file-full-path (concat *erc-logger-log-directory*
-						"/" file-name)))
+						"/" file-name))
+			(current-message-point (gethash erc-buffer *erc-logger-irc-buffer-size-map*))
+			(end-of-message-point (erc-logger-end-of-messages)))
 		   (if (string= *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d"))
 		       (progn
-			 (when (not (= (erc-logger-end-of-messages) (gethash erc-buffer *erc-logger-irc-buffer-size-map*)))
-			   (write-file-immut file-full-path)
-			   (puthash erc-buffer (erc-logger-end-of-messages) *erc-logger-irc-buffer-size-map*)))
+			 (if (file-exists-p file-full-path)
+			     (when (not (= end-of-message-point current-message-point))
+			       (append-to-file current-message-point end-of-message-point file-full-path))
+			   (erc-logger-write-file-immut file-full-path))
+			 (when (not (= end-of-message-point current-message-point))
+			   (puthash erc-buffer end-of-message-point *erc-logger-irc-buffer-size-map*)))
 
 		     ;; compress log files and mv them to another directory on next day
 		     ;; and clear the buffer, save to new files
-		     (progn (write-file-immut file-full-path)
+		     (progn (erc-logger-write-file-immut file-full-path)
 			    (if (directory-name-p *erc-logger-log-other-directory*)
 				(let* ((dir-name (concat *erc-logger-log-other-directory*
 							 (datetime-format "%Y-%m-%d") "/")))
