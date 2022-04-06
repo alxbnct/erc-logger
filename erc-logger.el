@@ -36,8 +36,7 @@
 (defvar *erc-logger-log-timer* nil)
 (defvar *erc-logger-log-date* nil)
 (defvar *erc-logger-log-todays-date* nil)
-(defvar *erc-logger-irc-buffer-size-map*
-  (make-hash-table :test 'equal))
+(defvar *erc-logger-irc-buffer-size-map* nil)
 
 (defun erc-logger-write-file-immut (filename)
   (let ((cur-buffer (current-buffer)))
@@ -71,11 +70,10 @@
     (mkdir *erc-logger-log-directory* "-p")
     (mkdir *erc-logger-log-other-directory* "-p"))
   ;; initialize hash table
+  (setq *erc-logger-irc-buffer-size-map* (make-hash-table :test 'equal))
   (dolist (erc-buffer (erc-buffer-list))
     (save-excursion
       (switch-to-buffer erc-buffer)
-      (setq-local inhibit-read-only t)
-      (remove-text-properties (point-min) (point-max) 'read-only)
       (unless (gethash erc-buffer *erc-logger-irc-buffer-size-map*)
 	(puthash erc-buffer (erc-logger-end-of-messages)
 		 *erc-logger-irc-buffer-size-map*))))
