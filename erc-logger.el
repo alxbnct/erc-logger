@@ -27,6 +27,12 @@
   :type 'string
   :group 'erc-logger)
 
+(defcustom *erc-logger-log-interval*
+  10
+  "The interval (second) to run `erc-log-buffers' repeatedly."
+  :type 'float
+  :group 'erc-logger)
+
 (defvar *erc-logger-log-timer* nil)
 (defvar *erc-logger-log-date* nil)
 (defvar *erc-logger-log-todays-date* nil)
@@ -74,7 +80,7 @@
 	(puthash erc-buffer (erc-logger-end-of-messages)
 		 *erc-logger-irc-buffer-size-map*))))
   (setq *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d")
-	*erc-logger-log-timer* (run-at-time "1 sec" 6 #'erc-log-buffers)))
+	*erc-logger-log-timer* (run-at-time "1 sec" *erc-logger-log-interval* #'erc-log-buffers)))
 
 (defun erc-logger-log-stop ()
   (interactive)
