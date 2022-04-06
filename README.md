@@ -17,7 +17,7 @@ Intallation
 ===========
 
 1. clone this repo to any location
-2. add the directory of the repo to `load-path'
+2. add the directory of the repo to `load-path`
 3. write the following config with any file name (eg. `.erc.emacs`)
 <pre>
 ;; .erc.emacs
@@ -30,7 +30,7 @@ Intallation
 ;; M-x customize-group <RET> erc-logger <RET>
 
 (erc-autojoin-mode 1)
-(erc :server "irc.libera.chat" :port 6667 :nick "__YOUR_NICKNAME__``" :password "__YOUR_PASSWORD__")
+(erc :server "irc.libera.chat" :port 6667 :nick "__YOUR_NICKNAME__" :password "__YOUR_PASSWORD__")
 (setq erc-autojoin-channels-alist '(("libera.chat" "#c" "#c++" "#linux"
                                      "#lisp" "##c++" "#clasp" "#clojure" "#guile"
                                       "#vim" "#neovim" "#emacs" "#erc")))
