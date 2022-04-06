@@ -17,7 +17,7 @@ Intallation
 ===========
 
 1. clone this repo to any location
-2. add the directory of the repo to `load-path`
+2. add the path of the repo to `load-path`
 3. write the following config with any file name (eg. `.erc.emacs`)
 <pre>
 ;; .erc.emacs
