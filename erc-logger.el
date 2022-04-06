@@ -8,8 +8,25 @@
 (require 'erc)
 (require 'cl)
 
-(defvar *erc-logger-log-directory* nil)
-(defvar *erc-logger-log-other-directory* nil)
+(defgroup erc-logger nil
+  "erc-logger customizations."
+  :group 'erc
+  :package-version '(erc-logger . "0.3"))
+
+(defcustom *erc-logger-log-directory*
+  "~/erc/log"
+  "This directory is used for storing messages of the current day,
+   it is recommanded to be set on an SSD. "
+  :type 'string
+  :group 'erc-logger)
+
+(defcustom *erc-logger-log-other-directory*
+  "~/erc/otherlog"
+  "This directory is used for storing all compressed messages organized by date,
+   it is recommanded to be set on an HDD. "
+  :type 'string
+  :group 'erc-logger)
+
 (defvar *erc-logger-log-timer* nil)
 (defvar *erc-logger-log-date* nil)
 (defvar *erc-logger-log-todays-date* nil)
@@ -39,11 +56,17 @@
 
 (defun erc-logger-log-start ()
   (interactive)
-  (setq *erc-logger-log-directory* (file-name-as-directory *erc-logger-log-directory*)
-	*erc-logger-log-other-directory* (file-name-as-directory *erc-logger-log-other-directory*))
+  (if (and *erc-logger-log-directory* *erc-logger-log-other-directory*)
+      (setq *erc-logger-log-directory* (file-name-as-directory *erc-logger-log-directory*)
+	    *erc-logger-log-other-directory* (file-name-as-directory *erc-logger-log-other-directory*))
+    (error "Invalid directory name, please set variable `*erc-logger-log-directory*' and `*erc-logger-log-other-directory*' properly."))
+  (unless (and (file-exists-p *erc-logger-log-directory*)
+	       (file-exists-p *erc-logger-log-other-directory*))
+    (mkdir *erc-logger-log-directory* "-p")
+    (mkdir *erc-logger-log-other-directory* "-p"))
   ;; initialize hash table
   (dolist (erc-buffer (erc-buffer-list))
-    (with-current-buffer (current-buffer)
+    (save-excursion
       (switch-to-buffer erc-buffer)
       (setq-local inhibit-read-only t)
       (remove-text-properties (point-min) (point-max) 'read-only)
@@ -61,7 +84,7 @@
 (defun erc-log-buffers ()
   (if (and *erc-logger-log-directory*
 	   (file-directory-p *erc-logger-log-directory*))
-      (progn (with-current-buffer (current-buffer)
+      (progn (save-excursion
 	       (dolist (erc-buffer (erc-buffer-list))
 		 (switch-to-buffer erc-buffer)
 		 (let* ((file-name (concat (buffer-name erc-buffer)
