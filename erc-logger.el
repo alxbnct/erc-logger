@@ -16,17 +16,6 @@
 (defvar *erc-logger-irc-buffer-size-map*
   (make-hash-table :test 'equal))
 
-;; (defun erc-logger-write-file-immut (filename)
-;;   (let ((cur-buffer (current-buffer)))
-;;     (with-temp-buffer
-;;       (insert-buffer cur-buffer)
-;;       (unless inhibit-read-only
-;; 	(setq-local inhibit-read-only t)
-;; 	(remove-text-properties (point-min) (point-max) 'read-only))
-;;       (goto-char (point-max))
-;;       (previous-line 2)
-;;       (delete-matching-lines "ERC> ")
-;;       (write-file filename))))
 (defun erc-logger-write-file-immut (filename)
   (let ((cur-buffer (current-buffer)))
     (with-temp-buffer
@@ -38,7 +27,6 @@
       (search-backward "ERC> ")
       (delete-region (line-beginning-position) (line-end-position))
       (write-file filename))))
-
 
 (defun erc-logger-end-of-messages ()
   (save-excursion
@@ -82,36 +70,50 @@
 						"/" file-name))
 			(current-message-point (gethash erc-buffer *erc-logger-irc-buffer-size-map*))
 			(end-of-message-point (erc-logger-end-of-messages)))
-		   (if (string= *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d"))
-		       (progn
-			 (if (file-exists-p file-full-path)
-			     (when (not (= end-of-message-point current-message-point))
-			       (append-to-file current-message-point end-of-message-point file-full-path))
-			   (erc-logger-write-file-immut file-full-path))
-			 (when (not (= end-of-message-point current-message-point))
-			   (puthash erc-buffer end-of-message-point *erc-logger-irc-buffer-size-map*)))
+		   (cl-flet ((save-buffer-graceful
+			      nil (if (file-exists-p file-full-path)
+				      (when (not (= end-of-message-point current-message-point))
+					(append-to-file current-message-point end-of-message-point file-full-path))
+				    (erc-logger-write-file-immut file-full-path))
+			      (when (not (= end-of-message-point current-message-point))
+				(puthash erc-buffer end-of-message-point *erc-logger-irc-buffer-size-map*)))
+			     (buffer-read-write
+			      ()
+			      (setq-local inhibit-read-only t)
+			      (remove-text-properties (point-min) (point-max) 'read-only))
+			     (buffer-read-only
+			      ()
+			      (setq-local inhibit-read-only nil))
+			     (clear-previous-days-messages
+			      ()
+			      (delete-region (point-min) end-of-message-point)))
+		     (if (string= *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d"))
+			 (save-buffer-graceful)
 
-		     ;; compress log files and mv them to another directory on next day
-		     ;; and clear the buffer, save to new files
-		     (progn (erc-logger-write-file-immut file-full-path)
-			    (if (directory-name-p *erc-logger-log-other-directory*)
-				(let* ((dir-name (concat *erc-logger-log-other-directory*
-							 (datetime-format "%Y-%m-%d") "/")))
-				  (cl-flet ((transfer-file ()
-							   (rename-file file-full-path dir-name t)
-							   (unless
-							       (= 0 (shell-command
-								     (concat "gzip -9f "
-									     dir-name
-									     file-name)))
-							     (message "failed to compress file!"))))
-				    (if (file-exists-p dir-name)
-					(transfer-file)
-				      (progn (make-directory dir-name)
-					     (when (file-exists-p dir-name)
-					       (transfer-file))))))
-			      (error "Invalid directory name, please set variable `*erc-logger-log-other-directory*' properly.")))
-		     ))))
+		       ;; compress log files and mv them to another directory on next day
+		       ;; and clear the buffer, save to new files
+		       (progn (save-buffer-graceful)
+			      (buffer-read-write)
+			      (clear-previous-days-messages)
+			      (buffer-read-only)
+			      (if (directory-name-p *erc-logger-log-other-directory*)
+				  (let* ((dir-name (concat *erc-logger-log-other-directory*
+							   (datetime-format "%Y-%m-%d") "/")))
+				    (cl-flet ((transfer-file ()
+							     (rename-file file-full-path dir-name t)
+							     (unless
+								 (= 0 (shell-command
+								       (concat "gzip -9f "
+									       dir-name
+									       file-name)))
+							       (message "failed to compress file!"))))
+				      (if (file-exists-p dir-name)
+					  (transfer-file)
+					(progn (make-directory dir-name)
+					       (when (file-exists-p dir-name)
+						 (transfer-file))))))
+				(error "Invalid directory name, please set variable `*erc-logger-log-other-directory*' properly.")))
+		       )))))
 	     (unless (string= *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d"))
 	       (setq *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d"))))
     (error "Invalid directory name, please set variable `*erc-logger-log-directory*' properly.")))
