@@ -79,7 +79,7 @@
       (unless (gethash erc-buffer *erc-logger-irc-buffer-size-map*)
 	(puthash erc-buffer (erc-logger-end-of-messages)
 		 *erc-logger-irc-buffer-size-map*))))
-  (setq *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d")
+  (setq *erc-logger-log-todays-date* (format-time-string "%Y-%m-%d")
 	*erc-logger-log-timer* (run-at-time "1 sec" *erc-logger-log-interval* #'erc-log-buffers)))
 
 (defun erc-logger-log-stop ()
@@ -94,7 +94,7 @@
 	       (dolist (erc-buffer (erc-buffer-list))
 		 (switch-to-buffer erc-buffer)
 		 (let* ((file-name (concat (buffer-name erc-buffer)
-					   (datetime-format "_%Y-%m-%d.txt")))
+					   (format-time-string "_%Y-%m-%d.txt")))
 			(file-full-path (concat *erc-logger-log-directory*
 						"/" file-name))
 			(current-message-point (gethash erc-buffer *erc-logger-irc-buffer-size-map*))
@@ -116,7 +116,7 @@
 			     (clear-previous-days-messages
 			      ()
 			      (delete-region (point-min) end-of-message-point)))
-		     (if (string= *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d"))
+		     (if (string= *erc-logger-log-todays-date* (format-time-string "%Y-%m-%d"))
 			 (save-buffer-graceful)
 
 		       ;; compress log files and mv them to another directory on next day
@@ -127,7 +127,7 @@
 			      (buffer-read-only)
 			      (if (directory-name-p *erc-logger-log-other-directory*)
 				  (let* ((dir-name (concat *erc-logger-log-other-directory*
-							   (datetime-format "%Y-%m-%d") "/")))
+							   (format-time-string "%Y-%m-%d") "/")))
 				    (cl-flet ((transfer-file ()
 							     (rename-file file-full-path dir-name t)
 							     (unless
@@ -143,8 +143,8 @@
 						 (transfer-file))))))
 				(error "Invalid directory name, please set variable `*erc-logger-log-other-directory*' properly.")))
 		       )))))
-	     (unless (string= *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d"))
-	       (setq *erc-logger-log-todays-date* (datetime-format "%Y-%m-%d"))))
+	     (unless (string= *erc-logger-log-todays-date* (format-time-string "%Y-%m-%d"))
+	       (setq *erc-logger-log-todays-date* (format-time-string "%Y-%m-%d"))))
     (error "Invalid directory name, please set variable `*erc-logger-log-directory*' properly.")))
 
 (provide 'erc-logger)
