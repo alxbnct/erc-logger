@@ -10,7 +10,8 @@
 Introduction
 ============
 
-This is a simple irc logger written in elisp!
+This is a simple irc logger written in elisp! It's used for logging all the irc channels
+you've joined and automatically organizing them into folders by date.
 
 
 Intallation
@@ -18,7 +19,12 @@ Intallation
 
 1. clone this repo to any location
 2. add the path of the repo to `load-path`
-3. write the following config with any file name (eg. `.erc.emacs`)
+3. byte compile the source file `erc-logger.el` using `byte-compile-file`
+
+Configuration
+=============
+
+write the following config with any file name (eg. `.erc.emacs`)
 <pre>
 ;; .erc.emacs
 
@@ -36,11 +42,16 @@ Intallation
                                       "#vim" "#neovim" "#emacs" "#erc")))
 (erc-logger-log-start))))
 </pre>
-4. run with emacs daemon
+
+Usage
+=====
+
+You can run with emacs daemon
 ```{bash}
 emacs -l /path/to/.erc.emacs --daemon=/path/to/socket-file
 ```
-5. connect with emacs-client
+and connect with emacs-client 
 ```{bash}
 emacs-client -nw -c -s /path/to/socket-file
 ```
+You can join new channel at run time using `/join`.
