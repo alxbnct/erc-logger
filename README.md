@@ -2,7 +2,8 @@ Introduction
 ============
 
 This is a simple irc logger written in elisp! It's used for logging all the irc channels
-you've joined and automatically organizing them into folders by date.
+you've joined and automatically organizing them into folders by date. It also support adding
+irc channels at run time.
 
 
 Intallation
