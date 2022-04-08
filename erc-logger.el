@@ -142,11 +142,7 @@
 
 			 ;; compress log files and mv them to another directory on next day
 			 ;; and clear the buffer, save to new files
-			 (progn 
-			   (buffer-read-write)
-			   (clear-previous-days-messages)
-			   (buffer-read-only)
-			   (save-buffer-graceful)
+			 (progn (save-buffer-graceful)
 			   (if (directory-name-p erc-logger-log-other-directory)
 			       (let* ((dir-name (file-name-as-directory (concat erc-logger-log-other-directory
 										erc-logger-log-todays-date))))
@@ -163,7 +159,11 @@
 				     (progn (make-directory dir-name)
 					    (when (file-exists-p dir-name)
 					      (transfer-file))))))
-			     (error "Invalid directory name, please set variable `erc-logger-log-other-directory' properly.")))
+			     (error "Invalid directory name, please set variable `erc-logger-log-other-directory' properly."))
+			   (buffer-read-write)
+			   (clear-previous-days-messages)
+			   (buffer-read-only)
+			   (save-buffer-graceful))
 			 ))))))
 	     (unless (string= erc-logger-log-todays-date (format-time-string "%Y-%m-%d"))
 	       (setq erc-logger-log-todays-date (format-time-string "%Y-%m-%d"))))
