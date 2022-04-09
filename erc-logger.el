@@ -110,7 +110,7 @@
 	       (dolist (erc-buffer (erc-buffer-list))
 		 (with-current-buffer erc-buffer
 		   (let* ((file-name (concat (buffer-name erc-buffer)
-					     (format-time-string "_%Y-%m-%d.txt")))
+					     "_" erc-logger-log-todays-date ".txt"))
 			  (file-full-path (concat erc-logger-log-directory
 						  "/" file-name))
 			  (current-message-point (gethash erc-buffer erc-logger-irc-buffer-size-map))
@@ -162,8 +162,7 @@
 			     (error "Invalid directory name, please set variable `erc-logger-log-other-directory' properly."))
 			   (buffer-read-write)
 			   (clear-previous-days-messages)
-			   (buffer-read-only)
-			   (save-buffer-graceful))
+			   (buffer-read-only))
 			 ))))))
 	     (unless (string= erc-logger-log-todays-date (format-time-string "%Y-%m-%d"))
 	       (setq erc-logger-log-todays-date (format-time-string "%Y-%m-%d"))))
