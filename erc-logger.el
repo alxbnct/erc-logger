@@ -64,7 +64,7 @@
 (defun erc-logger-write-file-immut (filename)
   (let ((cur-buffer (current-buffer)))
     (with-temp-buffer
-      (insert-buffer cur-buffer)
+      (insert-buffer-substring cur-buffer)
       (unless inhibit-read-only
 	(setq-local inhibit-read-only t))
       (goto-char (point-max))
