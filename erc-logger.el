@@ -93,6 +93,7 @@
   (dolist (erc-buffer (erc-buffer-list))
     (save-excursion
       (with-current-buffer erc-buffer
+	(set-buffer-file-coding-system 'utf-8-unix)
 	(unless (gethash erc-buffer erc-logger-irc-buffer-size-map)
 	  (puthash erc-buffer (erc-logger-end-of-messages)
 		   erc-logger-irc-buffer-size-map)))))
@@ -119,6 +120,7 @@
 		     (cl-flet ((save-buffer-graceful
 				nil (unless current-message-point
 				      (let ((new-current-message-point (erc-logger-end-of-messages)))
+					(set-buffer-file-coding-system 'utf-8-unix)
 					(puthash erc-buffer new-current-message-point
 						 erc-logger-irc-buffer-size-map)
 					(setq current-message-point new-current-message-point)))
