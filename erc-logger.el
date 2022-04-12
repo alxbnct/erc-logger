@@ -1,9 +1,9 @@
-;;                     _                             
-;;   ___ _ __ ___     | | ___   __ _  __ _  ___ _ __ 
+;;                     _
+;;   ___ _ __ ___     | | ___   __ _  __ _  ___ _ __
 ;;  / _ \ '__/ __|____| |/ _ \ / _` |/ _` |/ _ \ '__|
-;; |  __/ | | (_|_____| | (_) | (_| | (_| |  __/ |   
-;;  \___|_|  \___|    |_|\___/ \__, |\__, |\___|_|   
-;;                             |___/ |___/           
+;; |  __/ | | (_|_____| | (_) | (_| | (_| |  __/ |
+;;  \___|_|  \___|    |_|\___/ \__, |\__, |\___|_|
+;;                             |___/ |___/
 
 (require 'erc)
 (require 'cl-lib)
@@ -32,22 +32,23 @@
   "Time when to run `erc-logger-log-start' at.
    To specify a relative time as a string, use numbers followed by units. For
    example:
-   
+
    ‘1 min’
-      
+
    denotes 1 minute from now.
-      
+
    ‘1 min 5 sec’
-      
+
    denotes 65 seconds from now.
-      
+
    ‘1 min 2 sec 3 hour 4 day 5 week 6 fortnight 7 month 8 year’
-       
+
    denotes exactly 103 months, 123 days, and 10862 seconds from now.
 
-   For more information, please read the manual at https://www.gnu.org/software/emacs/manual/html_node/elisp/Timers.html#index-run_002dat_002dtime"
+   REF (info \"(elisp) Timers\")"
   :type 'string
   :group 'erc-logger)
+
 
 (defcustom erc-logger-log-interval
   10
