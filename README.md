@@ -42,8 +42,8 @@ You can run with emacs daemon
 ```{bash}
 emacs -l /path/to/.erc.emacs --daemon=/path/to/socket-file
 ```
-and connect with emacs-client 
+and connect using emacs-client 
 ```{bash}
 emacs-client -nw -c -s /path/to/socket-file
 ```
-You can join new channel at run time using `/join`.
+You can join new channel at run time using the irc command `/join`.
